@@ -4,35 +4,55 @@
 # Holidays falling on weekends do not affect the requirement.
 #
 # Format: YYYY-MM-DD
-# Dates should be in chronological order for readability.
+# Dates are in chronological order.
 
 holidays:
   # 2025 Holidays
-  - 2025-01-01  # New Year's Day (Wednesday)
-  - 2025-01-20  # Martin Luther King Jr. Day (Monday)
-  - 2025-02-17  # Presidents' Day (Monday)
-  - 2025-05-26  # Memorial Day (Monday)
-  - 2025-07-04  # Independence Day (Friday)
-  - 2025-09-01  # Labor Day (Monday)
-  - 2025-10-13  # Indigenous Peoples' Day (Monday)
-  - 2025-11-11  # Veterans Day (Tuesday)
-  - 2025-11-27  # Thanksgiving Day (Thursday)
-  - 2025-11-28  # Day After Thanksgiving (Friday)
-  - 2025-12-24  # Christmas Eve (Wednesday)
-  - 2025-12-25  # Christmas Day (Thursday)
-  - 2025-12-26  # Day After Christmas (Friday)
+  - 2025-09-01  # Labor Day
+  - 2025-10-13  # Indigenous People's Day
+  - 2025-11-11  # Veteran's Day
+
+  # Thanksgiving Week 2025
+  - 2025-11-24  # Monday before Thanksgiving
+  - 2025-11-25  # Tuesday before Thanksgiving
+  - 2025-11-26  # Wednesday before Thanksgiving
+  - 2025-11-27  # Thanksgiving Day
+  - 2025-11-28  # Friday after Thanksgiving
+
+  # Christmas & New Year's Shutdown 2025-2026
+  - 2025-12-22  # Monday before Christmas
+  - 2025-12-23  # Tuesday before Christmas
+  - 2025-12-24  # Christmas Eve
+  - 2025-12-25  # Christmas Day
+  - 2025-12-26  # Day after Christmas
+  - 2025-12-27  # End of year shutdown
+  - 2025-12-28  # End of year shutdown
+  - 2025-12-29  # End of year shutdown
+  - 2025-12-30  # End of year shutdown
+  - 2025-12-31  # New Year's Eve
+  - 2026-01-01  # New Year's Day
+  - 2026-01-02  # Day after New Year's
 
   # 2026 Holidays
-  - 2026-01-01  # New Year's Day (Thursday)
-  - 2026-01-02  # Day After New Year's (Friday)
-  - 2026-01-19  # Martin Luther King Jr. Day (Monday)
-  - 2026-02-16  # Presidents' Day (Monday)
-  - 2026-05-25  # Memorial Day (Monday)
-  - 2026-07-03  # Independence Day Observed (Friday)
-  - 2026-09-07  # Labor Day (Monday)
-  - 2026-10-12  # Indigenous Peoples' Day (Monday)
-  - 2026-11-11  # Veterans Day (Wednesday)
-  - 2026-11-26  # Thanksgiving Day (Thursday)
-  - 2026-11-27  # Day After Thanksgiving (Friday)
-  - 2026-12-24  # Christmas Eve (Thursday)
-  - 2026-12-25  # Christmas Day (Friday)
+  - 2026-01-19  # Martin Luther King Jr. Day
+  - 2026-02-16  # Presidents' Day
+  - 2026-05-25  # Memorial Day
+  - 2026-06-19  # Juneteenth
+
+  # 4th of July Week 2026
+  - 2026-06-29  # Monday before July 4th
+  - 2026-06-30  # Tuesday before July 4th
+  - 2026-07-01  # Wednesday before July 4th
+  - 2026-07-02  # Thursday before July 4th
+  - 2026-07-03  # Friday before July 4th (Independence Day observed)
+
+  - 2026-09-07  # Labor Day
+  - 2026-10-12  # Indigenous People's Day
+  - 2026-11-11  # Veterans Day
+
+  # Thanksgiving Week 2026
+  - 2026-11-23  # Monday before Thanksgiving
+  - 2026-11-24  # Tuesday before Thanksgiving
+  - 2026-11-25  # Wednesday before Thanksgiving
+  - 2026-11-26  # Thanksgiving Day
+  - 2026-11-27  # Friday after Thanksgiving
