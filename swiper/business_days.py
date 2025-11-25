@@ -115,9 +115,10 @@ class BusinessDayCalculator:
         """
         Count the total number of workdays in a date range (inclusive).
 
-        Iterates through each day in the range and counts days that are:
-        1. NOT weekends (Saturday/Sunday), AND
-        2. NOT exclusion days (holidays)
+        Uses date arithmetic to efficiently calculate workdays by:
+        1. Calculating total days in range
+        2. Subtracting weekend days (calculated mathematically)
+        3. Subtracting weekday exclusion days in range
 
         Args:
             start_date: First day of the range (inclusive)
@@ -127,9 +128,9 @@ class BusinessDayCalculator:
             The count of workdays in the range
 
         Implementation Notes:
-            - Iterates day-by-day using timedelta(days=1)
-            - Excludes Saturdays (weekday 5) and Sundays (weekday 6)
-            - Excludes any dates in the exclusion days set
+            - Uses date arithmetic instead of day-by-day iteration for efficiency
+            - Calculates weekend days mathematically based on complete weeks + remaining days
+            - Uses get_exclusions_in_range() for weekday exclusion count
             - Implements Requirements 4.4, 4.5, 4.6
 
         Examples:
@@ -141,15 +142,26 @@ class BusinessDayCalculator:
             >>> calc.count_workdays(date(2025, 8, 29), date(2025, 9, 2))
             2
         """
-        count = 0
-        current_date = start_date
+        # Calculate total days (inclusive)
+        total_days = (end_date - start_date).days + 1
 
-        while current_date <= end_date:
-            if self.is_workday(current_date):
-                count += 1
-            current_date += timedelta(days=1)
+        # Count weekend days mathematically
+        start_weekday = start_date.weekday()  # 0=Mon, 6=Sun
+        complete_weeks = total_days // 7
+        remaining_days = total_days % 7
 
-        return count
+        # Each complete week has 2 weekend days
+        weekend_days = complete_weeks * 2
+
+        # Check remaining days for weekends
+        for i in range(remaining_days):
+            if (start_weekday + i) % 7 in [5, 6]:  # Saturday=5, Sunday=6
+                weekend_days += 1
+
+        # Count weekday exclusions in range (get_exclusions_in_range already filters to weekdays)
+        exclusion_count = len(self.get_exclusions_in_range(start_date, end_date))
+
+        return total_days - weekend_days - exclusion_count
 
     def get_exclusions_in_range(self, start_date: date, end_date: date) -> list[date]:
         """

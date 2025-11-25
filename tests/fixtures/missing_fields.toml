@@ -1,0 +1,3 @@
+# Missing required fields - no data section
+[policy]
+required_days_per_period = 20

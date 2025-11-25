@@ -1,0 +1,13 @@
+# Valid reporting periods for testing
+
+[[periods]]
+period_number = 1
+start_date = 2025-08-15
+end_date = 2025-11-14
+report_date = 2025-11-21
+
+[[periods]]
+period_number = 2
+start_date = 2025-11-15
+end_date = 2026-02-13
+report_date = 2026-02-20

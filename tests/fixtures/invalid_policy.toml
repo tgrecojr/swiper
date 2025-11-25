@@ -1,0 +1,8 @@
+# Invalid policy - negative required days
+[policy]
+required_days_per_period = -5
+
+[data]
+reporting_periods_file = "tests/fixtures/valid_periods.toml"
+exclusion_days_file = "tests/fixtures/valid_holidays.yaml"
+attendance_data_dir = "tests/fixtures/data"

@@ -1,0 +1,9 @@
+# Valid test configuration for Swiper application
+
+[policy]
+required_days_per_period = 20
+
+[data]
+reporting_periods_file = "tests/fixtures/valid_periods.toml"
+exclusion_days_file = "tests/fixtures/valid_holidays.yaml"
+attendance_data_dir = "tests/fixtures/data"

@@ -65,7 +65,7 @@ class ReportingPeriod:
         period_number: Unique identifier for the period (e.g., 1, 2, 3...)
         start_date: First day of the reporting period (inclusive)
         end_date: Last day of the reporting period (inclusive)
-        deadline: Date by which compliance must be reported
+        report_date: Date by which compliance must be reported
         baseline_required_days: Required in-office days from configuration (e.g., 20)
         exclusion_days: List of holidays/shutdowns that fall within this period
         effective_required_days: Actual required days after subtracting exclusions
@@ -73,7 +73,7 @@ class ReportingPeriod:
     period_number: int
     start_date: date
     end_date: date
-    deadline: date
+    report_date: date
     baseline_required_days: int
     exclusion_days: list[date]
     effective_required_days: int

@@ -1,0 +1,6 @@
+# Invalid periods - end_date before start_date
+[[periods]]
+period_number = 1
+start_date = 2025-11-14
+end_date = 2025-08-15
+report_date = 2025-11-21

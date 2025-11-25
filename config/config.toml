@@ -1,0 +1,17 @@
+# Swiper Application Configuration
+# This file contains the main configuration settings for the attendance tracking system.
+
+[policy]
+# Number of required in-office days per reporting period (baseline)
+# This will be adjusted for each period based on exclusion days
+required_days_per_period = 20
+
+[data]
+# Path to the reporting periods definition file (relative to project root)
+reporting_periods_file = "config/reporting_periods.toml"
+
+# Path to the exclusion days (holidays) calendar file (relative to project root)
+exclusion_days_file = "config/holidays.yaml"
+
+# Directory where attendance data files are stored (relative to project root)
+attendance_data_dir = "data"
