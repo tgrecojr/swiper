@@ -32,9 +32,9 @@ htmlcov/
 # Logs (if redirected to files manually)
 *.log
 
-# Config (may contain sensitive data)
-config/config.yaml
-!config/config.example.yaml
+# Config (may contain sensitive data in production)
+# For development, config files are committed
+# In production, users should gitignore their customized versions
 
 # Attendance data (contains personal information)
 data/*.json

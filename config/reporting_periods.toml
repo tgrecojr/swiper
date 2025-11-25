@@ -1,0 +1,34 @@
+# Reporting Periods Configuration
+# Define the reporting periods for attendance tracking.
+# Each period must specify:
+#   - period_number: Unique period identifier (must be > 0)
+#   - start_date: First day of the period (YYYY-MM-DD)
+#   - end_date: Last day of the period (YYYY-MM-DD)
+#   - report_date: Date by which compliance must be reported (YYYY-MM-DD)
+#
+# The duration of each period is calculated from the start_date and end_date.
+# There are no assumptions about period length - periods can be any duration.
+
+[[periods]]
+period_number = 1
+start_date = 2025-08-15
+end_date = 2025-11-14
+report_date = 2025-11-21
+
+[[periods]]
+period_number = 2
+start_date = 2025-11-15
+end_date = 2026-02-13
+report_date = 2026-02-20
+
+[[periods]]
+period_number = 3
+start_date = 2026-02-14
+end_date = 2026-05-15
+report_date = 2026-05-22
+
+[[periods]]
+period_number = 4
+start_date = 2026-05-16
+end_date = 2026-08-14
+report_date = 2026-08-21

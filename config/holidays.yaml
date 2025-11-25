@@ -1,0 +1,38 @@
+# Holiday Calendar (Exclusion Days)
+# These dates are excluded from the required in-office days calculation.
+# Only holidays that fall on weekdays (Mon-Fri) will reduce the required days.
+# Holidays falling on weekends do not affect the requirement.
+#
+# Format: YYYY-MM-DD
+# Dates should be in chronological order for readability.
+
+holidays:
+  # 2025 Holidays
+  - 2025-01-01  # New Year's Day (Wednesday)
+  - 2025-01-20  # Martin Luther King Jr. Day (Monday)
+  - 2025-02-17  # Presidents' Day (Monday)
+  - 2025-05-26  # Memorial Day (Monday)
+  - 2025-07-04  # Independence Day (Friday)
+  - 2025-09-01  # Labor Day (Monday)
+  - 2025-10-13  # Indigenous Peoples' Day (Monday)
+  - 2025-11-11  # Veterans Day (Tuesday)
+  - 2025-11-27  # Thanksgiving Day (Thursday)
+  - 2025-11-28  # Day After Thanksgiving (Friday)
+  - 2025-12-24  # Christmas Eve (Wednesday)
+  - 2025-12-25  # Christmas Day (Thursday)
+  - 2025-12-26  # Day After Christmas (Friday)
+
+  # 2026 Holidays
+  - 2026-01-01  # New Year's Day (Thursday)
+  - 2026-01-02  # Day After New Year's (Friday)
+  - 2026-01-19  # Martin Luther King Jr. Day (Monday)
+  - 2026-02-16  # Presidents' Day (Monday)
+  - 2026-05-25  # Memorial Day (Monday)
+  - 2026-07-03  # Independence Day Observed (Friday)
+  - 2026-09-07  # Labor Day (Monday)
+  - 2026-10-12  # Indigenous Peoples' Day (Monday)
+  - 2026-11-11  # Veterans Day (Wednesday)
+  - 2026-11-26  # Thanksgiving Day (Thursday)
+  - 2026-11-27  # Day After Thanksgiving (Friday)
+  - 2026-12-24  # Christmas Eve (Thursday)
+  - 2026-12-25  # Christmas Day (Friday)

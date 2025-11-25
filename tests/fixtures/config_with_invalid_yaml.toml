@@ -1,0 +1,8 @@
+# Config that references invalid YAML file
+[policy]
+required_days_per_period = 20
+
+[data]
+reporting_periods_file = "tests/fixtures/valid_periods.toml"
+exclusion_days_file = "tests/fixtures/invalid_yaml.yaml"
+attendance_data_dir = "tests/fixtures/data"

@@ -1,0 +1,3 @@
+# Invalid TOML - missing closing bracket
+[policy
+required_days_per_period = 20

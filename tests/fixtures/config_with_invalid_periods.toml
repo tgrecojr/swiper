@@ -1,0 +1,8 @@
+# Config that references invalid periods file
+[policy]
+required_days_per_period = 20
+
+[data]
+reporting_periods_file = "tests/fixtures/invalid_periods.toml"
+exclusion_days_file = "tests/fixtures/valid_holidays.yaml"
+attendance_data_dir = "tests/fixtures/data"
