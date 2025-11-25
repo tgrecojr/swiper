@@ -14,12 +14,12 @@ if readme_file.exists():
 setup(
     name="swiper",
     version="0.1.0",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="T.J. Greco",
+    author_email="tgrecojr@gmail.com",
     description="In-Office Attendance Tracking for Return-to-Office Policies",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/swiper",
+    url="https://github.com/tgrecojr/swiper",
     packages=find_packages(exclude=["tests", "tests.*", "docs"]),
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -48,7 +48,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "swiper=swiper.cli:cli",
+            "swiper=swiper.cli:cli",  # CLI module will be implemented in Phase 7
         ],
     },
 )

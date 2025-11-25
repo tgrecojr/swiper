@@ -7,8 +7,7 @@ type-safe data representation and communication between components.
 
 from dataclasses import dataclass
 from datetime import date
-from pathlib import Path
-from typing import List, Literal
+from typing import Literal
 
 
 @dataclass
@@ -19,7 +18,7 @@ class PolicySettings:
     Attributes:
         required_days_per_period: Baseline minimum in-office days per reporting period
     """
-    required_days_per_period: int  # Default 20
+    required_days_per_period: int  # Baseline requirement (typically 20)
 
 
 @dataclass
@@ -76,7 +75,7 @@ class ReportingPeriod:
     end_date: date
     deadline: date
     baseline_required_days: int
-    exclusion_days: List[date]
+    exclusion_days: list[date]
     effective_required_days: int
 
 
