@@ -18,7 +18,7 @@ This document provides a granular, actionable task list for implementing the In-
 
 - [ ] 2. Create data models and type definitions
   - [ ] 2.1 Create `swiper/models.py` file
-  - [ ] 2.2 Implement `PolicySettings` dataclass with required_days_per_period and period_length_weeks fields
+  - [ ] 2.2 Implement `PolicySettings` dataclass with required_days_per_period field
   - [ ] 2.3 Implement `DataSettings` dataclass with file path fields
   - [ ] 2.4 Implement `ConfigSettings` dataclass combining PolicySettings and DataSettings
   - [ ] 2.5 Implement `ReportingPeriod` dataclass with all fields including baseline_required_days, exclusion_days, and effective_required_days
@@ -238,7 +238,7 @@ This document provides a granular, actionable task list for implementing the In-
   - [ ] 18.1 Create `@cli.group()` for config command group
   - [ ] 18.2 Create config show subcommand with `@config.command()`
   - [ ] 18.3 Display all settings from ConfigSettings dataclass in readable format
-  - [ ] 18.4 Display policy settings (required_days_per_period, period_length_weeks)
+  - [ ] 18.4 Display policy settings (required_days_per_period)
   - [ ] 18.5 Display data file paths
   - [ ] 18.6 Create config validate subcommand with `@config.command()`
   - [ ] 18.7 Call ConfigurationManager.validate_all() method
@@ -278,7 +278,7 @@ This document provides a granular, actionable task list for implementing the In-
 ## Phase 8: Configuration Files
 
 - [ ] 21. Create example configuration files
-  - [ ] 21.1 Create `config/config.toml` with default policy settings (required_days=20, period_weeks=13)
+  - [ ] 21.1 Create `config/config.toml` with default policy settings (required_days_per_period=20)
   - [ ] 21.2 Add data file paths to config.toml
   - [ ] 21.3 Create `config/reporting_periods.toml` with sample period definitions
   - [ ] 21.4 Migrate data from REPORTING_PERIODS.md to reporting_periods.toml in proper TOML array format
