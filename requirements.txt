@@ -1,0 +1,19 @@
+# Core dependencies for Swiper
+
+# CLI framework
+click>=8.1.0
+
+# Configuration validation
+pydantic>=2.0.0
+
+# YAML parsing for holiday calendar
+pyyaml>=6.0.0
+
+# TOML parsing for Python < 3.11 (3.11+ has built-in tomllib)
+tomli>=2.0.0; python_version < "3.11"
+
+# Development dependencies (install with: pip install -e ".[dev]")
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+# black>=23.0.0
+# mypy>=1.0.0
