@@ -8,8 +8,7 @@ settings and YAML holiday calendars.
 
 import sys
 from pathlib import Path
-from datetime import date
-from typing import Any
+from datetime import date, datetime
 
 # Handle Python 3.10 vs 3.11+ TOML support
 if sys.version_info >= (3, 11):
@@ -235,9 +234,6 @@ class ConfigurationManager:
 
             # Create ReportingPeriod with placeholder values for calculated fields
             # These will be populated by ReportingPeriodCalculator in Phase 5
-            if not self._settings:
-                raise ConfigurationError("Settings not loaded")
-
             period = ReportingPeriod(
                 period_number=validated.period_number,
                 start_date=validated.start_date,
@@ -295,12 +291,24 @@ class ConfigurationManager:
 
         # Convert to date objects
         exclusion_days: list[date] = []
-        for holiday in exclusions_data['holidays']:
+        for idx, holiday in enumerate(exclusions_data['holidays']):
             if isinstance(holiday, date):
+                # PyYAML automatically parsed the date
                 exclusion_days.append(holiday)
+            elif isinstance(holiday, str):
+                # Parse string dates in YYYY-MM-DD format
+                try:
+                    parsed_date = datetime.strptime(holiday, "%Y-%m-%d").date()
+                    exclusion_days.append(parsed_date)
+                except ValueError as e:
+                    raise ConfigurationError(
+                        f"Invalid date format at holidays[{idx}]: '{holiday}'. "
+                        f"Expected YYYY-MM-DD format. Error: {e}"
+                    )
             else:
                 raise ConfigurationError(
-                    f"Invalid holiday date format: {holiday}"
+                    f"Invalid holiday at index {idx}: {holiday} (type: {type(holiday).__name__}). "
+                    f"Expected date or string in YYYY-MM-DD format."
                 )
 
         return exclusion_days
