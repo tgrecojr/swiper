@@ -4,11 +4,13 @@
 
 This document defines the functional requirements for the In-Office Attendance Tracking Application. Each requirement is decomposed into specific, testable acceptance criteria assigned to system components defined in the architectural blueprint.
 
+**Key Design Principle**: All reporting period calculations are driven by the configured start and end dates of each period, not by assumed durations. The system does not hardcode or rely on any fixed period length—all workday counts, compliance calculations, and period determinations are based on the actual date ranges defined in configuration.
+
 ## Glossary
 
 - **Workday**: A weekday (Monday-Friday) that is not an exclusion day
 - **Exclusion Day**: A holiday or company shutdown day that does not count toward attendance requirements
-- **Reporting Period**: A 13-week span with defined start date, end date, and reporting deadline
+- **Reporting Period**: A time span with defined start date, end date, and reporting deadline (duration determined by configured dates)
 - **In-Office Day**: A workday where the employee is physically present at the office
 - **Remote Day**: A workday where the employee works from home
 - **Effective Required Days**: Baseline required in-office days minus exclusion days within the reporting period
@@ -28,7 +30,7 @@ The system shall load all configuration from TOML and YAML files, validate struc
 
 1.3. WHEN the main configuration file contains invalid TOML syntax, THE **ConfigurationManager** SHALL raise a ConfigurationError with line number and syntax details.
 
-1.4. WHEN the main configuration file is loaded successfully, THE **ConfigurationManager** SHALL validate the structure using Pydantic models enforcing required fields: `policy.required_days_per_period` (integer), `policy.period_length_weeks` (integer), `data.reporting_periods_file` (string), `data.exclusion_days_file` (string), and `data.attendance_data_dir` (string).
+1.4. WHEN the main configuration file is loaded successfully, THE **ConfigurationManager** SHALL validate the structure using Pydantic models enforcing required fields: `policy.required_days_per_period` (integer), `data.reporting_periods_file` (string), `data.exclusion_days_file` (string), and `data.attendance_data_dir` (string).
 
 1.5. WHEN any required configuration field is missing or has an invalid type, THE **ConfigurationManager** SHALL raise a ConfigurationError listing all validation failures.
 

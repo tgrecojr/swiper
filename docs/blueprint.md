@@ -2,7 +2,7 @@
 
 ## 1. Core Objective
 
-Build a single-user command-line application that tracks daily in-office vs. remote attendance, calculates compliance against configurable Return-to-Office (RTO) policies requiring minimum in-office days per 13-week reporting period, accounts for holidays and exclusion days that reduce requirements, and provides status reports—all using file-based storage without database dependencies.
+Build a single-user command-line application that tracks daily in-office vs. remote attendance, calculates compliance against configurable Return-to-Office (RTO) policies requiring minimum in-office days per reporting period, accounts for holidays and exclusion days that reduce requirements, and provides status reports—all using file-based storage without database dependencies.
 
 ## 2. System Scope and Boundaries
 
@@ -13,7 +13,7 @@ Build a single-user command-line application that tracks daily in-office vs. rem
 - Track compliance against configurable minimum in-office day requirements
 - Automatically exclude weekends from workday calculations
 - Support configurable exclusion days (holidays, company shutdowns) that reduce required in-office days
-- Define multiple 13-week reporting periods with start dates, end dates, and deadlines
+- Define multiple reporting periods with configurable start dates, end dates, and deadlines (period duration determined by configured dates)
 - Generate compliance reports showing in-office days recorded, required days, and remaining workdays
 - Validate all configuration files on startup
 - Store attendance data in JSON files organized by year

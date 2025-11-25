@@ -12,6 +12,7 @@ This document provides detailed technical specifications for implementing the In
 4. **Fail Fast**: Validate early and provide clear error messages
 5. **Idempotency**: Operations like recording attendance can be repeated safely
 6. **Atomic Operations**: File writes use atomic patterns to prevent corruption
+7. **Date-Driven Calculations**: All reporting period calculations use configured start/end dates, not assumed durations. The system never hardcodes period lengths—workday counts and compliance are computed from actual date ranges.
 
 ## Project Structure
 
@@ -68,8 +69,7 @@ from pathlib import Path
 @dataclass
 class PolicySettings:
     """Policy configuration for attendance requirements."""
-    required_days_per_period: int  # Default 20
-    period_length_weeks: int       # Default 13
+    required_days_per_period: int  # Default 20 - baseline requirement
 
 @dataclass
 class DataSettings:
@@ -93,7 +93,7 @@ from typing import List
 
 @dataclass
 class ReportingPeriod:
-    """Represents a 13-week reporting period. Implements Req 3.5."""
+    """Represents a reporting period with configurable duration. Implements Req 3.5."""
     period_number: int
     start_date: date
     end_date: date
@@ -545,8 +545,7 @@ def handle_error(error: Exception) -> None:
 ### config/config.toml
 ```toml
 [policy]
-required_days_per_period = 20  # Minimum in-office days per 13-week period
-period_length_weeks = 13       # Length of reporting periods
+required_days_per_period = 20  # Baseline minimum in-office days per reporting period
 
 [data]
 reporting_periods_file = "config/reporting_periods.toml"
