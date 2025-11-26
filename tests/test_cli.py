@@ -234,9 +234,9 @@ class TestReportCommand:
         result = runner.invoke(cli, ["--config", str(test_config), "report", "--all"])
 
         assert result.exit_code == 0
-        assert "REPORTING PERIOD 1" in result.output
-        assert "REPORTING PERIOD 2" in result.output
-        assert "REPORTING PERIOD 3" in result.output
+        assert "Reporting Period 1" in result.output
+        assert "Reporting Period 2" in result.output
+        assert "Reporting Period 3" in result.output
 
     def test_report_shows_compliance_status(self, runner, test_config, tmp_path):
         """Test that report shows compliance status correctly."""
@@ -254,15 +254,15 @@ class TestReportCommand:
         result = runner.invoke(cli, ["--config", str(test_config), "report", "--period", "1"])
 
         assert result.exit_code == 0
-        assert "Days Completed:" in result.output
-        assert "Remaining Required:" in result.output
+        assert "Days Completed" in result.output
+        assert "Remaining Required" in result.output
 
     def test_report_shows_risk_warnings(self, runner, test_config):
         """Test that report shows risk level warnings."""
         result = runner.invoke(cli, ["--config", str(test_config), "report", "--period", "1"])
 
         assert result.exit_code == 0
-        assert "Risk Level:" in result.output
+        assert "Risk Level" in result.output
 
 
 class TestConfigCommands:
@@ -274,18 +274,20 @@ class TestConfigCommands:
 
         assert result.exit_code == 0
         assert "Configuration Settings" in result.output
-        assert "Policy Settings:" in result.output
-        assert "Required Days Per Period: 20" in result.output
-        assert "Data Settings:" in result.output
+        assert "Policy Settings" in result.output
+        assert "Required Days Per Period" in result.output
+        assert "20" in result.output
+        assert "Data Settings" in result.output
 
     def test_config_validate_valid(self, runner, test_config):
         """Test config validate command with valid configuration."""
         result = runner.invoke(cli, ["--config", str(test_config), "config", "validate"])
 
         assert result.exit_code == 0
-        assert "Configuration valid" in result.output
-        assert "Reporting Periods: 3" in result.output
-        assert "Exclusion Days: 3" in result.output
+        assert "Configuration Valid" in result.output
+        assert "Reporting Periods" in result.output
+        assert "3" in result.output
+        assert "Exclusion Days" in result.output
 
     def test_config_validate_missing_file(self, runner, tmp_path):
         """Test config validate command with missing config file."""
@@ -388,7 +390,7 @@ class TestEndToEnd:
             cli, ["--config", str(test_config), "report", "--period", "1"]
         )
         assert result.exit_code == 0
-        assert "Days Completed:" in result.output
+        assert "Days Completed" in result.output
 
     def test_record_and_update_workflow(self, runner, test_config):
         """Test recording and then updating a record."""
@@ -427,5 +429,5 @@ class TestEndToEnd:
         # Generate report for all periods
         result = runner.invoke(cli, ["--config", str(test_config), "report", "--all"])
         assert result.exit_code == 0
-        assert "REPORTING PERIOD 1" in result.output
-        assert "REPORTING PERIOD 2" in result.output
+        assert "Reporting Period 1" in result.output
+        assert "Reporting Period 2" in result.output

@@ -11,6 +11,11 @@ from pathlib import Path
 from typing import Optional
 
 import click
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+from rich import box
+from rich.text import Text
 
 from swiper.business_days import BusinessDayCalculator
 from swiper.compliance import ComplianceChecker, ComplianceStatus
@@ -19,6 +24,38 @@ from swiper.exceptions import ConfigurationError, StorageError, ValidationError
 from swiper.models import AttendanceRecord, ReportingPeriod
 from swiper.reporting import ReportingPeriodCalculator
 from swiper.storage import AttendanceStore
+
+# Initialize rich console
+console = Console()
+
+
+def get_risk_color(risk_level: str) -> str:
+    """Get color for risk level display."""
+    colors = {
+        "achieved": "green",
+        "possible": "cyan",
+        "at-risk": "yellow",
+        "critical": "orange3",
+        "impossible": "red",
+    }
+    return colors.get(risk_level, "white")
+
+
+def get_risk_icon(risk_level: str) -> str:
+    """Get icon for risk level display."""
+    icons = {
+        "achieved": "✓",
+        "possible": "●",
+        "at-risk": "⚠",
+        "critical": "⚠⚠",
+        "impossible": "✗",
+    }
+    return icons.get(risk_level, "")
+
+
+def get_compliance_icon(is_compliant: bool) -> str:
+    """Get icon for compliance status."""
+    return "✓" if is_compliant else "✗"
 
 
 class AppContext:
@@ -104,74 +141,104 @@ def record(app: AppContext, status: str, date_str: Optional[str]) -> None:
         attendance_record = AttendanceRecord(date=record_date, status=status)
         app.attendance_store.save_record(attendance_record)
 
-        click.echo(f"Recorded {status} for {record_date}")
+        # Display success message with colors
+        status_color = "green" if status == "in-office" else "cyan"
+        icon = "🏢" if status == "in-office" else "🏠"
+        console.print(
+            f"[bold {status_color}]{icon} Recorded {status}[/] for [bold]{record_date}[/]"
+        )
 
     except (ValidationError, StorageError) as e:
-        click.echo(f"Error: {e}", err=True)
+        console.print(f"[bold red]✗ Error:[/] {e}", style="red")
         sys.exit(1)
 
 
-def format_status_output(period: ReportingPeriod, compliance: ComplianceStatus) -> str:
-    """Format compliance status for display.
+def format_status_output(period: ReportingPeriod, compliance: ComplianceStatus) -> None:
+    """Format and display compliance status with rich formatting.
 
     Args:
         period: The reporting period
         compliance: The compliance status
-
-    Returns:
-        Formatted string for display
     """
-    lines = []
-    lines.append(f"Reporting Period {period.period_number}")
-    lines.append(f"Period: {period.start_date} to {period.end_date}")
-    lines.append(f"Report Due: {period.report_date}")
-    lines.append("")
-    lines.append(f"Required Days (Baseline): {period.baseline_required_days}")
-    lines.append(
-        f"Required Days (Effective): {compliance.effective_required_days} (after {len(period.exclusion_days)} exclusions)"
-    )
-    lines.append(f"In-Office Days Recorded: {compliance.in_office_days}")
-    lines.append(f"Remaining Required Days: {compliance.remaining_required_days}")
-    lines.append(f"Workdays Remaining: {compliance.remaining_workdays}")
-    lines.append("")
+    # Create title
+    title = f"📊 Reporting Period {period.period_number}"
+
+    # Create info table
+    table = Table(show_header=False, box=box.ROUNDED, padding=(0, 1))
+    table.add_column("Label", style="cyan", width=30)
+    table.add_column("Value", style="white")
+
+    # Period info
+    table.add_row("Period", f"{period.start_date} to {period.end_date}")
+    table.add_row("Report Due", str(period.report_date))
+    table.add_section()
+
+    # Requirements
+    table.add_row("Required Days (Baseline)", str(period.baseline_required_days))
+    exclusion_info = f"{compliance.effective_required_days} (after {len(period.exclusion_days)} exclusions)"
+    table.add_row("Required Days (Effective)", exclusion_info)
+    table.add_section()
+
+    # Progress
+    table.add_row("In-Office Days Recorded", f"[bold green]{compliance.in_office_days}[/]")
+    table.add_row("Remaining Required Days", f"[bold yellow]{compliance.remaining_required_days}[/]")
+    table.add_row("Workdays Remaining", f"[bold cyan]{compliance.remaining_workdays}[/]")
+    table.add_section()
 
     # Compliance status
-    if compliance.is_compliant:
-        lines.append("Status: ✓ COMPLIANT")
-    else:
-        lines.append("Status: ✗ NOT COMPLIANT")
+    icon = get_compliance_icon(compliance.is_compliant)
+    status_color = "green" if compliance.is_compliant else "red"
+    status_text = "COMPLIANT" if compliance.is_compliant else "NOT COMPLIANT"
+    table.add_row("Status", f"[bold {status_color}]{icon} {status_text}[/]")
 
-    # Risk level with appropriate warnings
-    lines.append(f"Risk Level: {compliance.risk_level.upper()}")
+    # Risk level
+    risk_icon = get_risk_icon(compliance.risk_level)
+    risk_color = get_risk_color(compliance.risk_level)
+    table.add_row("Risk Level", f"[bold {risk_color}]{risk_icon} {compliance.risk_level.upper()}[/]")
 
+    # Display table
+    panel = Panel(table, title=title, border_style="blue")
+    console.print()
+    console.print(panel)
+
+    # Display warnings based on risk level
     if compliance.risk_level == "impossible":
         short_by = compliance.remaining_required_days - compliance.remaining_workdays
-        lines.append("")
-        lines.append(
-            f"WARNING: Compliance cannot be achieved. Short by {short_by} days "
-            f"with only {compliance.remaining_workdays} workdays remaining."
+        console.print()
+        console.print(
+            Panel(
+                f"⛔ Compliance cannot be achieved. Short by [bold]{short_by}[/] days with only [bold]{compliance.remaining_workdays}[/] workdays remaining.",
+                title="WARNING",
+                border_style="red",
+                padding=(0, 1)
+            )
         )
     elif compliance.risk_level == "critical":
-        lines.append("")
-        lines.append(
-            f"CRITICAL: You must be in-office for all {compliance.remaining_workdays} "
-            "remaining workdays to achieve compliance."
+        console.print()
+        console.print(
+            Panel(
+                f"You must be in-office for [bold]all {compliance.remaining_workdays} remaining workdays[/] to achieve compliance.",
+                title="⚠ CRITICAL",
+                border_style="orange3",
+                padding=(0, 1)
+            )
         )
     elif compliance.risk_level == "at-risk":
-        buffer_days = compliance.remaining_workdays - compliance.remaining_required_days
         required_pct = (
             (compliance.remaining_required_days / compliance.remaining_workdays * 100)
             if compliance.remaining_workdays > 0
             else 0
         )
-        lines.append("")
-        lines.append(
-            f"AT RISK: You need {compliance.remaining_required_days} more in-office days "
-            f"out of {compliance.remaining_workdays} remaining workdays "
-            f"({required_pct:.0f}% attendance required)."
+        console.print()
+        console.print(
+            Panel(
+                f"You need [bold]{compliance.remaining_required_days}[/] more in-office days out of [bold]{compliance.remaining_workdays}[/] remaining workdays ([bold]{required_pct:.0f}%[/] attendance required).",
+                title="⚠ AT RISK",
+                border_style="yellow",
+                padding=(0, 1)
+            )
         )
-
-    return "\n".join(lines)
+    console.print()
 
 
 @cli.command()
@@ -191,64 +258,82 @@ def status(app: AppContext) -> None:
             current_period, as_of_date=date.today()
         )
 
-        output = format_status_output(current_period, compliance)
-        click.echo(output)
+        format_status_output(current_period, compliance)
 
     except (ValidationError, StorageError) as e:
-        click.echo(f"Error: {e}", err=True)
+        console.print(f"[bold red]✗ Error:[/] {e}", style="red")
         sys.exit(1)
 
 
 def format_report_output(
     period: ReportingPeriod, compliance: ComplianceStatus, show_header: bool = True
-) -> str:
-    """Format a compliance report for a single period.
+) -> None:
+    """Format and display a compliance report for a single period.
 
     Args:
         period: The reporting period
         compliance: The compliance status
         show_header: Whether to show a header with period details
-
-    Returns:
-        Formatted string for display
     """
-    lines = []
+    # Create title
+    title = f"📊 Reporting Period {period.period_number}" if show_header else "📊 Current Period"
 
-    if show_header:
-        lines.append("=" * 70)
-        lines.append(f"REPORTING PERIOD {period.period_number}")
-        lines.append("=" * 70)
+    # Create info table
+    table = Table(show_header=False, box=box.SIMPLE, padding=(0, 2))
+    table.add_column("Label", style="cyan", width=25)
+    table.add_column("Value", style="white")
 
-    lines.append(f"Period: {period.start_date} to {period.end_date}")
-    lines.append(f"Report Due: {period.report_date}")
-    lines.append(
-        f"Required Days: {period.baseline_required_days} baseline, "
+    # Period info
+    table.add_row("Period", f"{period.start_date} to {period.end_date}")
+    table.add_row("Report Due", str(period.report_date))
+    table.add_row(
+        "Required Days",
+        f"{period.baseline_required_days} baseline, "
         f"{compliance.effective_required_days} effective "
         f"({len(period.exclusion_days)} exclusions)"
     )
-    lines.append("")
-    lines.append(f"Days Completed: {compliance.in_office_days}")
-    lines.append(f"Remaining Required: {compliance.remaining_required_days}")
-    lines.append(f"Remaining Workdays: {compliance.remaining_workdays}")
-    lines.append("")
+    table.add_row("", "")  # Empty row for spacing
+
+    # Progress
+    table.add_row("Days Completed", f"[bold green]{compliance.in_office_days}[/]")
+    table.add_row("Remaining Required", f"[bold yellow]{compliance.remaining_required_days}[/]")
+    table.add_row("Remaining Workdays", f"[bold cyan]{compliance.remaining_workdays}[/]")
+    table.add_row("", "")  # Empty row for spacing
 
     # Compliance status
-    status_symbol = "✓" if compliance.is_compliant else "✗"
+    icon = get_compliance_icon(compliance.is_compliant)
+    status_color = "green" if compliance.is_compliant else "red"
     status_text = "COMPLIANT" if compliance.is_compliant else "NOT COMPLIANT"
-    lines.append(f"Status: {status_symbol} {status_text}")
-    lines.append(f"Risk Level: {compliance.risk_level.upper()}")
+    table.add_row("Status", f"[bold {status_color}]{icon} {status_text}[/]")
 
-    # Add warnings based on risk level
+    # Risk level
+    risk_icon = get_risk_icon(compliance.risk_level)
+    risk_color = get_risk_color(compliance.risk_level)
+    table.add_row("Risk Level", f"[bold {risk_color}]{risk_icon} {compliance.risk_level.upper()}[/]")
+
+    # Display table
+    console.print()
+    console.print(Panel(table, title=title, border_style="blue"))
+
+    # Display warnings based on risk level
     if compliance.risk_level == "impossible":
         short_by = compliance.remaining_required_days - compliance.remaining_workdays
-        lines.append("")
-        lines.append(
-            f"WARNING: Compliance cannot be achieved. Short by {short_by} days."
+        console.print(
+            Panel(
+                f"⛔ Compliance cannot be achieved. Short by [bold]{short_by}[/] days.",
+                title="WARNING",
+                border_style="red",
+                padding=(0, 1)
+            )
         )
     elif compliance.risk_level == "critical":
-        lines.append("")
-        lines.append(
-            f"CRITICAL: Must be in-office for all {compliance.remaining_workdays} remaining workdays."
+        console.print(
+            Panel(
+                f"You must be in-office for [bold]all {compliance.remaining_workdays} remaining workdays[/] to achieve compliance.",
+                title="⚠ CRITICAL",
+                border_style="orange3",
+                padding=(0, 1)
+            )
         )
     elif compliance.risk_level == "at-risk":
         required_pct = (
@@ -256,13 +341,15 @@ def format_report_output(
             if compliance.remaining_workdays > 0
             else 0
         )
-        lines.append("")
-        lines.append(
-            f"AT RISK: Need {compliance.remaining_required_days} more days "
-            f"({required_pct:.0f}% of remaining workdays)."
+        console.print(
+            Panel(
+                f"You need [bold]{compliance.remaining_required_days}[/] more days ([bold]{required_pct:.0f}%[/] of remaining workdays).",
+                title="⚠ AT RISK",
+                border_style="yellow",
+                padding=(0, 1)
+            )
         )
-
-    return "\n".join(lines)
+    console.print()
 
 
 @cli.command()
@@ -297,32 +384,24 @@ def report(app: AppContext, period: Optional[int], show_all: bool) -> None:
         elif period is not None:
             period_obj = app.reporting_calc.get_period_by_number(period)
             if period_obj is None:
-                click.echo(f"Error: Invalid period number: {period}", err=True)
+                console.print(f"[bold red]✗ Error:[/] Invalid period number: {period}", style="red")
                 sys.exit(1)
             periods = [period_obj]
         else:
             # Default to current period
             periods = [app.reporting_calc.get_current_period()]
 
-        # Generate reports
-        outputs = []
+        # Generate and display reports
         for p in periods:
             compliance = app.compliance_checker.calculate_compliance_status(
                 p, as_of_date=date.today()
             )
             # Show header if reporting on multiple periods OR if a specific period was requested
             show_period_header = show_all or period is not None
-            output = format_report_output(p, compliance, show_header=show_period_header)
-            outputs.append(output)
-
-        # Display with separators for multiple periods
-        if show_all:
-            click.echo("\n\n".join(outputs))
-        else:
-            click.echo(outputs[0])
+            format_report_output(p, compliance, show_header=show_period_header)
 
     except (ValidationError, StorageError) as e:
-        click.echo(f"Error: {e}", err=True)
+        console.print(f"[bold red]✗ Error:[/] {e}", style="red")
         sys.exit(1)
 
 
@@ -349,24 +428,35 @@ def config_show(app: AppContext) -> None:
     try:
         settings = app.config_manager.get_settings()
 
-        lines = []
-        lines.append("Configuration Settings")
-        lines.append("=" * 70)
-        lines.append("")
-        lines.append("Policy Settings:")
-        lines.append(
-            f"  Required Days Per Period: {settings.policy.required_days_per_period}"
-        )
-        lines.append("")
-        lines.append("Data Settings:")
-        lines.append(f"  Reporting Periods File: {settings.data.reporting_periods_file}")
-        lines.append(f"  Exclusion Days File: {settings.data.exclusion_days_file}")
-        lines.append(f"  Attendance Data Dir: {settings.data.attendance_data_dir}")
+        # Create configuration table
+        table = Table(show_header=False, box=box.ROUNDED, padding=(0, 2))
+        table.add_column("Setting", style="cyan", width=30)
+        table.add_column("Value", style="white")
 
-        click.echo("\n".join(lines))
+        # Policy settings
+        table.add_row(
+            "[bold]Policy Settings[/]",
+            ""
+        )
+        table.add_row(
+            "  Required Days Per Period",
+            str(settings.policy.required_days_per_period)
+        )
+        table.add_row("", "")  # Empty row for spacing
+
+        # Data settings
+        table.add_row("[bold]Data Settings[/]", "")
+        table.add_row("  Reporting Periods File", settings.data.reporting_periods_file)
+        table.add_row("  Exclusion Days File", settings.data.exclusion_days_file)
+        table.add_row("  Attendance Data Dir", settings.data.attendance_data_dir)
+
+        # Display table
+        console.print()
+        console.print(Panel(table, title="⚙️  Configuration Settings", border_style="blue"))
+        console.print()
 
     except (ConfigurationError, ValidationError) as e:
-        click.echo(f"Error: {e}", err=True)
+        console.print(f"[bold red]✗ Error:[/] {e}", style="red")
         sys.exit(1)
 
 
@@ -387,15 +477,27 @@ def config_validate(app: AppContext) -> None:
         periods = app.config_manager.get_reporting_periods()
         exclusions = app.config_manager.get_exclusion_days()
 
-        lines = []
-        lines.append("Configuration valid ✓")
-        lines.append(f"  Reporting Periods: {len(periods)}")
-        lines.append(f"  Exclusion Days: {len(exclusions)}")
+        # Create validation results table
+        table = Table(show_header=False, box=box.SIMPLE, padding=(0, 2))
+        table.add_column("Item", style="cyan", width=25)
+        table.add_column("Count", style="green")
 
-        click.echo("\n".join(lines))
+        table.add_row("Reporting Periods", str(len(periods)))
+        table.add_row("Exclusion Days", str(len(exclusions)))
+
+        console.print()
+        console.print(
+            Panel(
+                table,
+                title="✓ Configuration Valid",
+                border_style="green",
+                subtitle="All configuration files are properly formatted"
+            )
+        )
+        console.print()
 
     except (ConfigurationError, ValidationError) as e:
-        click.echo(f"Error: {e}", err=True)
+        console.print(f"[bold red]✗ Error:[/] {e}", style="red")
         sys.exit(1)
 
 
