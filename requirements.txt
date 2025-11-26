@@ -3,6 +3,9 @@
 # CLI framework
 click>=8.1.0
 
+# Rich terminal formatting
+rich>=13.0.0
+
 # Configuration validation
 pydantic>=2.0.0
 
