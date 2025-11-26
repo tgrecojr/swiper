@@ -246,19 +246,27 @@ def format_status_output(period: ReportingPeriod, compliance: ComplianceStatus) 
 def status(app: AppContext) -> None:
     """Show current compliance status.
 
-    Displays your attendance status for the current reporting period,
-    including days completed, days remaining, and compliance risk level.
+    Displays your attendance status for all current reporting periods.
+    Since periods can overlap, you may be in multiple periods at once.
 
     Example:
         swiper status
     """
     try:
-        current_period = app.reporting_calc.get_current_period()
-        compliance = app.compliance_checker.calculate_compliance_status(
-            current_period, as_of_date=date.today()
-        )
+        current_periods = app.reporting_calc.get_current_periods()
 
-        format_status_output(current_period, compliance)
+        if not current_periods:
+            console.print("[yellow]No active reporting periods for today's date.[/]")
+            return
+
+        if len(current_periods) > 1:
+            console.print(f"\n[bold cyan]You are currently in {len(current_periods)} overlapping reporting periods:[/]\n")
+
+        for period in current_periods:
+            compliance = app.compliance_checker.calculate_compliance_status(
+                period, as_of_date=date.today()
+            )
+            format_status_output(period, compliance)
 
     except (ValidationError, StorageError) as e:
         console.print(f"[bold red]✗ Error:[/] {e}", style="red")
@@ -369,8 +377,8 @@ def format_report_output(
 def report(app: AppContext, period: Optional[int], show_all: bool) -> None:
     """Generate compliance reports.
 
-    By default, shows the current period. Use --period to specify a
-    different period, or --all to show all periods.
+    By default, shows all current periods (since periods can overlap).
+    Use --period to specify a different period, or --all to show all periods.
 
     Examples:
         swiper report
@@ -388,8 +396,15 @@ def report(app: AppContext, period: Optional[int], show_all: bool) -> None:
                 sys.exit(1)
             periods = [period_obj]
         else:
-            # Default to current period
-            periods = [app.reporting_calc.get_current_period()]
+            # Default to current periods (may be multiple if overlapping)
+            periods = app.reporting_calc.get_current_periods()
+            if not periods:
+                console.print("[yellow]No active reporting periods for today's date.[/]")
+                return
+
+        # Show message if multiple current periods
+        if not show_all and period is None and len(periods) > 1:
+            console.print(f"\n[bold cyan]You are currently in {len(periods)} overlapping reporting periods:[/]\n")
 
         # Generate and display reports
         for p in periods:
@@ -397,7 +412,7 @@ def report(app: AppContext, period: Optional[int], show_all: bool) -> None:
                 p, as_of_date=date.today()
             )
             # Show header if reporting on multiple periods OR if a specific period was requested
-            show_period_header = show_all or period is not None
+            show_period_header = show_all or period is not None or len(periods) > 1
             format_report_output(p, compliance, show_header=show_period_header)
 
     except (ValidationError, StorageError) as e:

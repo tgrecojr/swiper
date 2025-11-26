@@ -159,10 +159,14 @@ class TestStatusCommand:
         # The command should work, but may fail if today's date is outside configured periods
         # We'll check if it executed (exit code 0 or validation error)
         if result.exit_code == 0:
-            assert "Reporting Period" in result.output
-            assert "Required Days" in result.output
-            assert "Status:" in result.output
-            assert "Risk Level:" in result.output
+            # Either we're in a period and see the report, or we're outside and see the message
+            if "No active reporting periods" in result.output:
+                assert "No active reporting periods for today's date" in result.output
+            else:
+                assert "Reporting Period" in result.output
+                assert "Required Days" in result.output
+                assert "Status:" in result.output
+                assert "Risk Level:" in result.output
         else:
             # If we're outside configured periods, should get a ValidationError
             assert "Error:" in result.output
@@ -196,7 +200,9 @@ class TestStatusCommand:
         # The exact risk level depends on current date and attendance
         # Just verify the command runs and shows risk information
         if result.exit_code == 0:
-            assert "Risk Level:" in result.output
+            # Either we're in a period and see the risk level, or we're outside
+            if "No active reporting periods" not in result.output:
+                assert "Risk Level:" in result.output
 
 
 class TestReportCommand:
@@ -208,10 +214,12 @@ class TestReportCommand:
 
         # Should show current period or error if outside all periods
         if result.exit_code == 0:
-            assert "Period:" in result.output
-            assert "Report Due:" in result.output
-            assert "Required Days:" in result.output
-            assert "Status:" in result.output
+            # Either we're in a period and see the report, or we're outside
+            if "No active reporting periods" not in result.output:
+                assert "Period:" in result.output
+                assert "Report Due:" in result.output
+                assert "Required Days:" in result.output
+                assert "Status:" in result.output
 
     def test_report_specific_period(self, runner, test_config):
         """Test report command with --period option."""

@@ -368,3 +368,137 @@ class TestGetAllPeriods:
 
         for i, period in enumerate(all_periods):
             assert period.period_number == sample_periods[i].period_number
+
+
+class TestGetPeriodsForDate:
+    """Test getting all periods for a specific date."""
+
+    def test_find_single_period(self, calculator):
+        """Test finding a single period for a date."""
+        periods = calculator.get_periods_for_date(date(2025, 9, 15))
+        assert len(periods) == 1
+        assert periods[0].period_number == 1
+
+    def test_find_multiple_periods_with_overlapping_fixture(self):
+        """Test finding multiple overlapping periods."""
+        # Create overlapping periods like the actual config
+        overlapping_periods = [
+            ReportingPeriod(
+                period_number=1,
+                start_date=date(2025, 8, 15),
+                end_date=date(2025, 11, 14),
+                report_date=date(2025, 12, 3),
+                baseline_required_days=20,
+                exclusion_days=[],
+                effective_required_days=20
+            ),
+            ReportingPeriod(
+                period_number=2,
+                start_date=date(2025, 10, 20),  # Overlaps with period 1
+                end_date=date(2026, 1, 16),
+                report_date=date(2026, 1, 28),
+                baseline_required_days=20,
+                exclusion_days=[],
+                effective_required_days=20
+            ),
+        ]
+        business_calc = BusinessDayCalculator([])
+        calc = ReportingPeriodCalculator(overlapping_periods, business_calc)
+
+        # Date that falls in both periods
+        periods = calc.get_periods_for_date(date(2025, 11, 1))
+        assert len(periods) == 2
+        assert periods[0].period_number == 1
+        assert periods[1].period_number == 2
+
+    def test_find_no_periods(self, calculator):
+        """Test that date outside all periods returns empty list."""
+        periods = calculator.get_periods_for_date(date(2024, 1, 1))
+        assert len(periods) == 0
+        assert periods == []
+
+    def test_period_start_date(self, calculator):
+        """Test finding period on its start date."""
+        periods = calculator.get_periods_for_date(date(2025, 8, 15))
+        assert len(periods) == 1
+        assert periods[0].period_number == 1
+
+    def test_period_end_date(self, calculator):
+        """Test finding period on its end date."""
+        periods = calculator.get_periods_for_date(date(2025, 11, 14))
+        assert len(periods) == 1
+        assert periods[0].period_number == 1
+
+
+class TestGetCurrentPeriods:
+    """Test getting current periods."""
+
+    def test_get_current_periods_with_overlapping(self):
+        """Test getting multiple current periods when they overlap."""
+        today = date.today()
+
+        # Create periods that overlap and include today
+        overlapping_periods = [
+            ReportingPeriod(
+                period_number=1,
+                start_date=date(today.year - 1, 1, 1),
+                end_date=date(today.year + 1, 12, 31),
+                report_date=date(today.year + 2, 1, 15),
+                baseline_required_days=20,
+                exclusion_days=[],
+                effective_required_days=20
+            ),
+            ReportingPeriod(
+                period_number=2,
+                start_date=date(today.year - 1, 6, 1),
+                end_date=date(today.year + 1, 6, 30),
+                report_date=date(today.year + 2, 7, 15),
+                baseline_required_days=20,
+                exclusion_days=[],
+                effective_required_days=20
+            ),
+        ]
+        business_calc = BusinessDayCalculator([])
+        calc = ReportingPeriodCalculator(overlapping_periods, business_calc)
+
+        current_periods = calc.get_current_periods()
+        assert len(current_periods) == 2
+        assert all(p.start_date <= today <= p.end_date for p in current_periods)
+
+    def test_get_current_periods_single(self, sample_periods, sample_holidays):
+        """Test getting current period when only one exists."""
+        today = date.today()
+
+        # Create a single period that includes today
+        test_periods = [
+            ReportingPeriod(
+                period_number=1,
+                start_date=date(today.year - 1, 1, 1),
+                end_date=date(today.year + 1, 12, 31),
+                report_date=date(today.year + 2, 1, 15),
+                baseline_required_days=20,
+                exclusion_days=[],
+                effective_required_days=20
+            )
+        ]
+        business_calc = BusinessDayCalculator(sample_holidays)
+        calc = ReportingPeriodCalculator(test_periods, business_calc)
+
+        current_periods = calc.get_current_periods()
+        assert len(current_periods) == 1
+        assert current_periods[0].period_number == 1
+
+    def test_get_current_periods_none(self, calculator):
+        """Test getting current periods when none exist (if today is outside all periods)."""
+        today = date.today()
+
+        # Only test if today is actually outside the sample periods
+        try:
+            period = calculator.get_period_for_date(today)
+            # If we get here, today IS in a period, so skip this test
+            pytest.skip("Today is within sample period range")
+        except ValidationError:
+            # Today is not in any period, test should work
+            current_periods = calculator.get_current_periods()
+            assert len(current_periods) == 0
+            assert current_periods == []

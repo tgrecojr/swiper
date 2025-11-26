@@ -66,6 +66,30 @@ class ReportingPeriodCalculator:
 
         raise ValidationError(f"No reporting period defined for date {check_date}")
 
+    def get_periods_for_date(self, check_date: date) -> list[ReportingPeriod]:
+        """
+        Find all reporting periods that contain a specific date.
+
+        Since reporting periods can overlap, multiple periods may contain
+        the same date. This method returns all matching periods.
+
+        Args:
+            check_date: Date to find the periods for
+
+        Returns:
+            List of ReportingPeriod instances that contain the date (may be empty)
+
+        Implementation Notes:
+            - Iterates through all periods to find matches
+            - Date must be within start_date and end_date (inclusive)
+            - Returns empty list if no periods contain the date
+        """
+        matching_periods = []
+        for period in self._periods:
+            if period.start_date <= check_date <= period.end_date:
+                matching_periods.append(period)
+        return matching_periods
+
     def get_current_period(self) -> ReportingPeriod:
         """
         Get the reporting period for today's date.
@@ -81,6 +105,22 @@ class ReportingPeriodCalculator:
             - Implements Requirement 3.4
         """
         return self.get_period_for_date(date.today())
+
+    def get_current_periods(self) -> list[ReportingPeriod]:
+        """
+        Get all reporting periods for today's date.
+
+        Since reporting periods can overlap, there may be multiple
+        current periods active at the same time.
+
+        Returns:
+            List of ReportingPeriod instances that contain today's date (may be empty)
+
+        Implementation Notes:
+            - Calls get_periods_for_date() with date.today()
+            - Returns list of all overlapping periods
+        """
+        return self.get_periods_for_date(date.today())
 
     def calculate_effective_required_days(self, period: ReportingPeriod) -> int:
         """
