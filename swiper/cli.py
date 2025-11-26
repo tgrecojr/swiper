@@ -263,10 +263,12 @@ def status(app: AppContext) -> None:
             console.print(f"\n[bold cyan]You are currently in {len(current_periods)} overlapping reporting periods:[/]\n")
 
         for period in current_periods:
+            # Enrich period with exclusion data
+            enriched_period = app.reporting_calc.enrich_period_with_exclusions(period)
             compliance = app.compliance_checker.calculate_compliance_status(
-                period, as_of_date=date.today()
+                enriched_period, as_of_date=date.today()
             )
-            format_status_output(period, compliance)
+            format_status_output(enriched_period, compliance)
 
     except (ValidationError, StorageError) as e:
         console.print(f"[bold red]✗ Error:[/] {e}", style="red")
@@ -408,12 +410,14 @@ def report(app: AppContext, period: Optional[int], show_all: bool) -> None:
 
         # Generate and display reports
         for p in periods:
+            # Enrich period with exclusion data
+            enriched_period = app.reporting_calc.enrich_period_with_exclusions(p)
             compliance = app.compliance_checker.calculate_compliance_status(
-                p, as_of_date=date.today()
+                enriched_period, as_of_date=date.today()
             )
             # Show header if reporting on multiple periods OR if a specific period was requested
             show_period_header = show_all or period is not None or len(periods) > 1
-            format_report_output(p, compliance, show_header=show_period_header)
+            format_report_output(enriched_period, compliance, show_header=show_period_header)
 
     except (ValidationError, StorageError) as e:
         console.print(f"[bold red]✗ Error:[/] {e}", style="red")
