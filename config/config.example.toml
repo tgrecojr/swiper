@@ -1,0 +1,20 @@
+# Swiper Configuration File - Example Template
+# Copy this file to config.toml and customize for your organization.
+
+[policy]
+# Number of in-office days required per reporting period
+# Adjust this based on your organization's return-to-office policy
+required_days_per_period = 20
+
+[data]
+# Path to reporting periods definition file (relative to project root)
+# This file defines when each reporting period starts, ends, and when reports are due
+reporting_periods_file = "config/reporting_periods.toml"
+
+# Path to holiday/exclusion days calendar file (relative to project root)
+# This file lists dates when in-office attendance is not counted (holidays, company closures)
+exclusion_days_file = "config/holidays.yaml"
+
+# Directory for storing attendance records (relative to project root)
+# Attendance data will be stored in JSON files organized by year
+attendance_data_dir = "data"

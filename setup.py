@@ -48,7 +48,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "swiper=swiper.cli:cli",  # CLI module will be implemented in Phase 7
+            "swiper=swiper.cli:cli",
         ],
     },
 )
